@@ -117,6 +117,8 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 # Rutas de redirección para el sistema de usuarios
 LOGIN_REDIRECT_URL = 'panel'  # A dónde va al iniciar sesión con éxito
 LOGOUT_REDIRECT_URL = 'login' # A dónde va al cerrar sesión
