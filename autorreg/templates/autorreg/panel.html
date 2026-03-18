@@ -1,0 +1,135 @@
+{% extends 'autorreg/base.html' %}
+
+{% block contenido %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <h2 class="text-xl font-bold text-slate-800 mb-2">
+            {% if fecha_activa == hoy %}
+                Registro de Hoy
+            {% else %}
+                <span class="text-blue-600">Editando: {{ fecha_activa|date:"d/m/Y" }}</span>
+            {% endif %}
+        </h2>
+        {% if fecha_activa != hoy %}
+            <a href="{% url 'panel' %}" class="text-sm text-slate-500 hover:text-slate-800 underline mb-4 inline-block">&larr; Volver al día de hoy</a>
+        {% endif %}
+        
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm font-bold text-slate-700">Readiness (1-10)</label>
+                {{ formulario.readiness }}
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-slate-700">RPE (1-10)</label>
+                {{ formulario.rpe }}
+            </div>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg mt-4">
+                Guardar
+            </button>
+        </form>
+    </div>
+
+    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <h2 class="text-xl font-bold text-slate-800 mb-4">Tendencia de Carga Interna (Últimos 10 días)</h2>
+        
+        <div class="relative h-64 w-full">
+            <canvas id="tendenciasChart"></canvas>
+        </div>
+    </div>
+
+    <div class="lg:col-span-3 mt-4 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-slate-50 border-b border-slate-200 px-6 py-4">
+            <h2 class="text-lg font-bold text-slate-800">Historial Reciente (Últimos 7 días)</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 text-slate-500 text-sm uppercase tracking-wider">
+                        <th class="px-6 py-3 border-b border-slate-200">Fecha</th>
+                        <th class="px-6 py-3 border-b border-slate-200">Readiness</th>
+                        <th class="px-6 py-3 border-b border-slate-200">RPE</th>
+                        <th class="px-6 py-3 border-b border-slate-200 text-right">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="text-slate-700">
+                    {% for sesion in historial %}
+                    <tr class="hover:bg-slate-50 border-b border-slate-100 last:border-0 transition-colors">
+                        <td class="px-6 py-4 font-medium">{{ sesion.fecha|date:"d M Y" }}</td>
+                        <td class="px-6 py-4">
+                            <span class="bg-blue-100 text-blue-800 py-1 px-3 rounded-full text-xs font-bold">{{ sesion.readiness }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="bg-red-100 text-red-800 py-1 px-3 rounded-full text-xs font-bold">{{ sesion.rpe }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <a href="?fecha={{ sesion.fecha|date:'Y-m-d' }}" class="text-blue-600 hover:text-blue-800 font-semibold text-sm px-3 py-1 border border-blue-200 rounded hover:bg-blue-50 transition-colors">
+                                Editar ✎
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-8 text-center text-slate-500">No hay registros en los últimos 7 días.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Recogemos los datos que nos envía Django desde views.py
+    const fechas = JSON.parse('{{ fechas|safe }}');
+    const readinessData = JSON.parse('{{ readiness_data|safe }}');
+    const rpeData = JSON.parse('{{ rpe_data|safe }}');
+
+    const ctx = document.getElementById('tendenciasChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: fechas,
+            datasets: [
+                {
+                    label: 'Readiness (Preparación)',
+                    data: readinessData,
+                    borderColor: '#3b82f6', // Azul Tailwind (blue-500)
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.3, // Curva suavizada
+                    fill: true
+                },
+                {
+                    label: 'RPE (Esfuerzo)',
+                    data: rpeData,
+                    borderColor: '#ef4444', // Rojo Tailwind (red-500)
+                    backgroundColor: 'transparent',
+                    borderWidth: 3,
+                    borderDash: [5, 5], // Línea punteada para diferenciarla
+                    tension: 0.3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    min: 0,
+                    max: 10, // Fijamos la escala de Borg
+                    ticks: { stepSize: 1 }
+                }
+            },
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+</script>
+{% endblock %}

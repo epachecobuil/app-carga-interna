@@ -1,0 +1,23 @@
+{% extends 'autorreg/base.html' %}
+
+{% block contenido %}
+<div class="max-w-md mx-auto bg-white rounded-xl shadow-sm border border-slate-200 p-8 mt-10">
+    <h2 class="text-2xl font-bold text-slate-800 text-center mb-6">Iniciar Sesión</h2>
+    
+    <form method="POST" class="space-y-4">
+        {% csrf_token %}
+        
+        <div class="space-y-4 [&>p>label]:block [&>p>label]:text-sm [&>p>label]:font-bold [&>p>label]:text-slate-700 [&>p>input]:w-full [&>p>input]:mt-1 [&>p>input]:rounded-md [&>p>input]:border-slate-300 [&>p>input]:p-2 [&>p>input]:border [&>p>input]:bg-slate-50">
+            {{ form.as_p }}
+        </div>
+
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg mt-6">
+            Entrar al Panel
+        </button>
+    </form>
+    
+    <p class="text-center text-sm text-slate-500 mt-6">
+        ¿No tienes cuenta? <a href="{% url 'registro' %}" class="text-blue-600 font-semibold hover:underline">Regístrate aquí</a>
+    </p>
+</div>
+{% endblock %}
