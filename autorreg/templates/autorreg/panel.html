@@ -27,10 +27,35 @@
                 <label class="block text-sm font-bold text-slate-700">RPE (1-10)</label>
                 {{ formulario.rpe }}
             </div>
+            <div>
+                <label class="block text-sm font-bold text-slate-700">Duración (Minutos)</label>
+                {{ formulario.duracion_minutos }}
+            </div>
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg mt-4">
                 Guardar
             </button>
         </form>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 text-center flex flex-col items-center justify-start">
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Carga Aguda</p>
+                <p class="text-2xl font-black text-slate-800">{{ carga_aguda }} <span class="text-sm font-normal text-slate-500">uc</span></p>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 text-center flex flex-col items-center justify-start">
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Carga Crónica</p>
+                <p class="text-2xl font-black text-slate-800">{{ carga_cronica|floatformat:1 }} <span class="text-sm font-normal text-slate-500">uc</span></p>
+            </div>
+            
+            <div class="p-4 rounded-lg border text-center text-white flex flex-col items-center justify-start
+                {% if acwr == 0 %} bg-slate-400 border-slate-500
+                {% elif acwr < 0.8 %} bg-blue-500 border-blue-600
+                {% elif acwr <= 1.3 %} bg-green-500 border-green-600
+                {% elif acwr <= 1.5 %} bg-orange-500 border-orange-600
+                {% else %} bg-red-600 border-red-700 animate-pulse {% endif %}">
+                <p class="text-xs text-white/80 font-bold uppercase tracking-wider">Ratio ACWR</p>
+                <p class="text-3xl font-black">{{ acwr }}</p>
+            </div>
     </div>
 
     <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
@@ -52,6 +77,8 @@
                         <th class="px-6 py-3 border-b border-slate-200">Fecha</th>
                         <th class="px-6 py-3 border-b border-slate-200">Readiness</th>
                         <th class="px-6 py-3 border-b border-slate-200">RPE</th>
+                        <th class="px-6 py-3 border-b border-slate-200">Minutos</th>
+                        <th class="px-6 py-3 border-b border-slate-200 font-bold">Carga (uc)</th>
                         <th class="px-6 py-3 border-b border-slate-200 text-right">Acción</th>
                     </tr>
                 </thead>
@@ -64,6 +91,12 @@
                         </td>
                         <td class="px-6 py-4">
                             <span class="bg-red-100 text-red-800 py-1 px-3 rounded-full text-xs font-bold">{{ sesion.rpe }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            {{ sesion.duracion_minutos }}'
+                        </td>
+                        <td class="px-6 py-4 font-black text-slate-800">
+                            {{ sesion.carga_foster }}
                         </td>
                         <td class="px-6 py-4 text-right">
                             <a href="?fecha={{ sesion.fecha|date:'Y-m-d' }}" class="text-blue-600 hover:text-blue-800 font-semibold text-sm px-3 py-1 border border-blue-200 rounded hover:bg-blue-50 transition-colors">

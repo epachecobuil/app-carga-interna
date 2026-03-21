@@ -1,18 +1,27 @@
 from django import forms
 from .models import RegistroSesion
 
+READINESS_RPE_CHOICES = [(i, i) for i in range(1, 11)]
+
 class RegistroSesionForm(forms.ModelForm):
+    readiness = forms.ChoiceField(
+        choices=READINESS_RPE_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'w-full mt-1 rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border bg-slate-50'
+        })
+    )
+    rpe = forms.ChoiceField(
+        choices=READINESS_RPE_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'w-full mt-1 rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border bg-slate-50'
+        })
+    )
+
     class Meta:
         model = RegistroSesion
-        # Solo pedimos estos dos campos, la fecha y el usuario los pondremos en automático
-        fields = ['readiness', 'rpe'] 
+        # AÑADIMOS 'duracion_minutos' A LA LISTA
+        fields = ['readiness', 'rpe', 'duracion_minutos'] 
         
-        # Le damos estilo Tailwind a los selectores desplegables
         widgets = {
-            'readiness': forms.Select(attrs={
-                'class': 'w-full mt-1 rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border bg-slate-50'
-            }),
-            'rpe': forms.Select(attrs={
-                'class': 'w-full mt-1 rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border bg-slate-50'
-            })
+            'duracion_minutos': forms.NumberInput(attrs={'class': 'w-full mt-1 rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border bg-slate-50', 'min': '1', 'max': '300'})
         }

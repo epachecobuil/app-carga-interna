@@ -2,20 +2,20 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class RegistroSesion(models.Model):
-    # Relacionamos el registro con el deportista (usuario de Django)
     deportista = models.ForeignKey(User, on_delete=models.CASCADE)
     fecha = models.DateField()
-    
-    # Restringimos los valores del 1 al 10
-    ESCALA_1_10 = [(i, str(i)) for i in range(1, 11)]
-    
-    readiness = models.IntegerField(choices=ESCALA_1_10, verbose_name="Readiness (Preparación)")
-    rpe = models.IntegerField(choices=ESCALA_1_10, verbose_name="RPE (Esfuerzo Percibido)")
+    readiness = models.IntegerField()
+    rpe = models.IntegerField()
+    # Le ponemos default=60 para que no dé error con los registros guardados
+    duracion_minutos = models.PositiveIntegerField(default=60) 
 
     class Meta:
-        # Esto evita que un deportista cree dos registros distintos el mismo día
-        unique_together = ('deportista', 'fecha')
-        ordering = ['-fecha'] # Ordena los registros del más reciente al más antiguo
+        unique_together = ['deportista', 'fecha']
+
+    # NUEVO: El modelo calcula su propia carga automáticamente
+    @property
+    def carga_foster(self):
+        return self.rpe * self.duracion_minutos
 
     def __str__(self):
-        return f"{self.deportista.username} - {self.fecha} - RPE: {self.rpe}"
+        return f"{self.deportista.username} - {self.fecha}"

@@ -43,7 +43,30 @@ def panel_deportista(request):
     else:
         formulario = RegistroSesionForm(instance=registro_activo)
 
-    # 3. DATOS PARA LA GRÁFICA (Igual que antes)
+     # 3. DATOS PARA LA GRÁFICA Y EL HISTORIAL
+    limite_7_dias = hoy - timedelta(days=7)
+    limite_28_dias = hoy - timedelta(days=28) # Necesitamos 4 semanas para la crónica
+
+    historial = RegistroSesion.objects.filter(
+        deportista=request.user, 
+        fecha__gte=limite_7_dias,
+        fecha__lte=hoy
+    ).order_by('-fecha')
+
+    # --- NUEVA LÓGICA ACWR ---
+    # A. Carga Aguda (Suma de los últimos 7 días)
+    registros_agudos = RegistroSesion.objects.filter(deportista=request.user, fecha__gt=limite_7_dias, fecha__lte=hoy)
+    carga_aguda = sum(r.carga_foster for r in registros_agudos)
+
+    # B. Carga Crónica (Suma de los últimos 28 días / 4 semanas)
+    registros_cronicos = RegistroSesion.objects.filter(deportista=request.user, fecha__gt=limite_28_dias, fecha__lte=hoy)
+    carga_cronica_total = sum(r.carga_foster for r in registros_cronicos)
+    carga_cronica = carga_cronica_total / 4 if carga_cronica_total > 0 else 0
+
+    # C. Cálculo del ACWR
+    acwr = round(carga_aguda / carga_cronica, 2) if carga_cronica > 0 else 0.00
+    # -------------------------
+
     ultimos_registros = RegistroSesion.objects.filter(deportista=request.user).order_by('-fecha')[:10]
     registros_cronologicos = list(ultimos_registros)[::-1]
     
@@ -51,26 +74,21 @@ def panel_deportista(request):
     readiness_data = [r.readiness for r in registros_cronologicos]
     rpe_data = [r.rpe for r in registros_cronologicos]
 
-    # 4. DATOS PARA LA TABLA DE HISTORIAL (Estrictamente últimos 7 días)
-    limite_7_dias = hoy - timedelta(days=7)
-    historial = RegistroSesion.objects.filter(
-        deportista=request.user, 
-        fecha__gte=limite_7_dias,
-        fecha__lte=hoy
-    ).order_by('-fecha')
-
+    # Añadimos nuestras nuevas variables matemáticas al contexto
     contexto = {
         'formulario': formulario,
-        'fecha_activa': fecha_activa, # Lo pasamos al HTML para cambiar el título
+        'fecha_activa': fecha_activa,
         'hoy': hoy,
-        'historial': historial,       # La lista de los últimos 7 días
+        'historial': historial,
+        'carga_aguda': carga_aguda,
+        'carga_cronica': carga_cronica,
+        'acwr': acwr,
         'fechas': json.dumps(fechas),
         'readiness_data': json.dumps(readiness_data),
         'rpe_data': json.dumps(rpe_data),
     }
 
     return render(request, 'autorreg/panel.html', contexto)
-
 
 # ... (aquí sigue tu código del panel_deportista) ...
 
