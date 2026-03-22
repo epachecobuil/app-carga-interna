@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from autorreg import views as autorreg_views
 
@@ -16,4 +16,7 @@ urlpatterns = [
     
     # 2. Herramienta de Carga Interna
     path('carga-interna/', autorreg_views.panel_deportista, name='panel_carga'),
+
+    # 3. Herramienta de Registro de Fuerza
+    path('fuerza/', include('registro_fuerza.urls')),
 ]
