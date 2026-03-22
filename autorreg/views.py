@@ -72,6 +72,9 @@ def sincronizar_resting_heart_rate_intervals(usuario, fecha_cadena):
         return None
 
 @login_required(login_url='login') 
+def hub_principal(request):
+    return render(request, 'autorreg/hub.html')
+
 def panel_deportista(request):
     hoy = timezone.now().date()
     
@@ -84,7 +87,7 @@ def panel_deportista(request):
             # Bloqueo de seguridad: No dejar editar más allá de 7 días
             if (hoy - fecha_activa).days > 7:
                 messages.error(request, 'Por motivos de rigor científico, no se pueden editar sesiones de hace más de 7 días.')
-                return redirect('panel')
+                return redirect('hub')
         except ValueError:
             fecha_activa = hoy
     else:
@@ -108,7 +111,7 @@ def panel_deportista(request):
             # ---------------------------------------
             registro.save()
             messages.success(request, f'¡Métricas del {fecha_activa.strftime("%d/%m/%Y")} guardadas correctamente!' if rhr_detectada else f'¡Métricas del {fecha_activa.strftime("%d/%m/%Y")} guardadas, pero no se pudo sincronizar el Resting Heart Rate!')
-            return redirect('panel') 
+            return redirect('hub') 
     else:
         formulario = RegistroSesionForm(instance=registro_activo)
 
@@ -170,13 +173,10 @@ def panel_deportista(request):
 
     return render(request, 'autorreg/panel.html', contexto)
 
-# ... (aquí sigue tu código del panel_deportista) ...
-
-# AÑADE ESTA FUNCIÓN AL FINAL:
 def registro_usuario(request):
-    # Si el usuario ya está logueado, lo mandamos al panel
+    # Si el usuario ya está logueado, lo mandamos al hub
     if request.user.is_authenticated:
-        return redirect('panel')
+        return redirect('hub')
 
     if request.method == 'POST':
         formulario = UserCreationForm(request.POST)
@@ -185,7 +185,7 @@ def registro_usuario(request):
             # Logueamos al usuario automáticamente tras registrarse
             login(request, usuario)
             messages.success(request, f'¡Bienvenido a la plataforma, {usuario.username}!')
-            return redirect('panel')
+            return redirect('hub')
     else:
         formulario = UserCreationForm()
 

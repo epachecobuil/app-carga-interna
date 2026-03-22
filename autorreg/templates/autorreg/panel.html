@@ -14,7 +14,7 @@
             {% endif %}
         </h2>
         {% if fecha_activa != hoy %}
-            <a href="{% url 'panel' %}" class="text-sm text-slate-500 hover:text-slate-800 underline mb-4 inline-block">&larr; Volver al día de hoy</a>
+            <a href="{% url 'panel_carga' %}" class="text-sm text-slate-500 hover:text-slate-800 underline mb-4 inline-block">&larr; Volver al día de hoy</a>
         {% endif %}
         
         <form method="POST" class="space-y-4">
