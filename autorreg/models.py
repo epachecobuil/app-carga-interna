@@ -8,6 +8,8 @@ class RegistroSesion(models.Model):
     rpe = models.IntegerField()
     # Le ponemos default=60 para que no dé error con los registros guardados
     duracion_minutos = models.PositiveIntegerField(default=60) 
+    # Permitimos que el usuario deje el campo de restingHR vacío, ya que no siempre se mide
+    restingHR = models.FloatField(null=True, blank=True)
 
     class Meta:
         unique_together = ['deportista', 'fecha']

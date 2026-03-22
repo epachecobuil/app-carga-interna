@@ -46,7 +46,10 @@
                 <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Carga Crónica</p>
                 <p class="text-2xl font-black text-slate-800">{{ carga_cronica|floatformat:1 }} <span class="text-sm font-normal text-slate-500">uc</span></p>
             </div>
-            
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 text-center flex flex-col items-center justify-start">
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Resting HR</p>
+                <p class="text-2xl font-black text-slate-800">{{ registro.restingHR|default:"N/A" }} <span class="text-sm font-normal text-slate-500">bpm</span></p>
+            </div>
             <div class="p-4 rounded-lg border text-center text-white flex flex-col items-center justify-start
                 {% if acwr == 0 %} bg-slate-400 border-slate-500
                 {% elif acwr < 0.8 %} bg-blue-500 border-blue-600
@@ -59,7 +62,7 @@
     </div>
 
     <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <h2 class="text-xl font-bold text-slate-800 mb-4">Tendencia de Carga Interna (Últimos 10 días)</h2>
+        <h2 class="text-xl font-bold text-slate-800 mb-4">Tendencia de Carga Interna y Resting HR (Últimos 10 días)</h2>
         
         <div class="relative h-64 w-full">
             <canvas id="tendenciasChart"></canvas>
@@ -121,6 +124,7 @@
     const fechas = JSON.parse('{{ fechas|safe }}');
     const readinessData = JSON.parse('{{ readiness_data|safe }}');
     const rpeData = JSON.parse('{{ rpe_data|safe }}');
+    const restingHrData = JSON.parse('{{ resting_hr_data|safe }}');
 
     const ctx = document.getElementById('tendenciasChart').getContext('2d');
     
@@ -146,6 +150,16 @@
                     borderWidth: 3,
                     borderDash: [5, 5], // Línea punteada para diferenciarla
                     tension: 0.3
+                },
+                {
+                    label: 'Resting HR (bpm)',
+                    data: restingHrData,
+                    borderColor: '#10b981', // Verde Tailwind (emerald-500)
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    fill: false,
+                    yAxisID: 'y1' // Usar eje Y secundario
                 }
             ]
         },
@@ -154,9 +168,31 @@
             maintainAspectRatio: false,
             scales: {
                 y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
                     min: 0,
                     max: 10, // Fijamos la escala de Borg
-                    ticks: { stepSize: 1 }
+                    ticks: { stepSize: 1 },
+                    title: {
+                        display: true,
+                        text: 'Readiness / RPE (1-10)'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    min: 40,
+                    max: 100, // Rango típico de resting HR
+                    ticks: { stepSize: 5 },
+                    title: {
+                        display: true,
+                        text: 'Resting HR (bpm)'
+                    },
+                    grid: {
+                        drawOnChartArea: false, // Evitar líneas de grid superpuestas
+                    }
                 }
             },
             plugins: {
