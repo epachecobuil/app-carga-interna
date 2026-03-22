@@ -1,0 +1,36 @@
+{% extends 'autorreg/base.html' %}
+
+{% block contenido %}
+<div class="max-w-xl mx-auto mt-12 mb-12">
+    
+    <div class="mb-6">
+        <a href="{% url 'panel_fuerza' %}" class="text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors">&larr; Volver al Panel de Fuerza</a>
+    </div>
+
+    <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-blue-500">
+        <h2 class="text-2xl font-black text-slate-800 mb-2">Editar Serie</h2>
+        <p class="text-sm text-slate-500 mb-6">Estás modificando el registro de <strong>{{ serie.ejercicio.nombre }}</strong> del día {{ serie.fecha|date:"d/m/Y" }}.</p>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div class="space-y-4">
+                {% for field in form %}
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="mt-8 flex gap-4">
+                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition-colors shadow-sm text-center">
+                    Guardar Cambios
+                </button>
+                <a href="{% url 'panel_fuerza' %}" class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-md transition-colors text-center border border-slate-200">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

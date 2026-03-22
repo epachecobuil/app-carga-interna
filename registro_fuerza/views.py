@@ -7,6 +7,7 @@ from .forms import EjercicioForm, SesionFuerzaForm
 from autorreg.models import RegistroSesion 
 from django.db.models import F, FloatField, ExpressionWrapper
 from datetime import date
+from django.shortcuts import render, redirect, get_object_or_404
 
 @login_required(login_url='login')
 def panel_fuerza(request):
@@ -86,3 +87,28 @@ def panel_fuerza(request):
         'minutos_actuales': minutos_actuales
     }
     return render(request, 'registro_fuerza/panel.html', contexto)
+
+@login_required(login_url='login')
+def editar_serie(request, serie_id):
+    # Recuperamos la serie exacta. Validamos que pertenezca al usuario actual por seguridad.
+    serie = get_object_or_404(SesionFuerza, id=serie_id, usuario=request.user)
+    
+    if request.method == 'POST':
+        # Le pasamos el 'instance=serie' para decirle a Django que sobrescriba, no que cree una nueva
+        form = SesionFuerzaForm(request.POST, instance=serie)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Serie actualizada correctamente.')
+            return redirect('panel_fuerza')
+    else:
+        # Si entra por primera vez (GET), le mostramos el formulario pre-rellenado
+        form = SesionFuerzaForm(instance=serie)
+        
+    # Filtramos para que no salgan ejercicios de otros usuarios en el desplegable
+    form.fields['ejercicio'].queryset = Ejercicio.objects.filter(usuario=request.user)
+
+    contexto = {
+        'form': form,
+        'serie': serie
+    }
+    return render(request, 'registro_fuerza/editar_serie.html', contexto)
