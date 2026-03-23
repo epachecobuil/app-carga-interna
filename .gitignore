@@ -1,12 +1,11 @@
 # Entornos virtuales
+.env/
 .venv/
-entorno_cafyd/
-env_cint/
 
 # Archivos de caché de Python
 __pycache__/
 *.pyc
 */__pycache__/
 
-# Base de datos local (comentado para que se suban tus 3 registros de prueba)
-# db.sqlite3
+# Base de datos local
+db.sqlite3

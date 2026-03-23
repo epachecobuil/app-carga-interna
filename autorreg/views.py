@@ -2,11 +2,15 @@ import requests
 from requests.auth import HTTPBasicAuth
 import json
 import logging
+import os
+from dotenv import load_dotenv
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.contrib import messages
 from datetime import datetime, timedelta #Para sumar y restar días
+
+load_dotenv()
 from .forms import RegistroSesionForm
 from .models import RegistroSesion
 from django.contrib.auth.forms import UserCreationForm
@@ -23,8 +27,8 @@ def sincronizar_resting_heart_rate_intervals(usuario, fecha_cadena):
         - None: Si hay error en la conexión, autenticación, o el campo no existe
     """
     # Datos de autenticación (deberías guardarlos en variables de entorno en producción)
-    ATHLETE_ID = 'i435252'
-    API_KEY = '6bj09nd1vuontje38pwn3drd7'
+    ATHLETE_ID = os.getenv('INTERVALS_ATHLETE_ID') 
+    API_KEY = os.getenv('INTERVALS_API_KEY')
     
     # La URL exacta para pedir los datos de "Wellness" (Salud) de un día concreto
     url = f"https://intervals.icu/api/v1/athlete/{ATHLETE_ID}/wellness/{fecha_cadena}"
